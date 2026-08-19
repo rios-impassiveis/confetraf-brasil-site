@@ -1,30 +1,88 @@
 media:
   input: public
   output: /
+
 content:
   - name: posts
-    label: Posts
+    label: Notícias
     type: collection
     path: src/content/blog
+    filename: "{primary}.md"
+
     view:
-      fields: [ title, draft, date ]
+      fields: [title, draft, pubDatetime]
+      primary: title
+      sort: pubDatetime
+      default:
+        sort: pubDatetime
+        order: desc
+
     fields:
-      - { name: author, label: Author, type: string }
-      - { name: pubDatetime, label: Date, type: date }
-      - { name: modDatetime, label: Date, type: date }
-      - { name: title, label: Title, type: string, required: true }
-      - { name: ogImage, label: Title, type: string }
-      - { name: slug, label: Slug, type: string }
-      - { name: featured, label: Featured, type: boolean }
-      - { name: draft, label: Draft, type: boolean }
-      - { name: tags, label: Tags, type: string, list: true }
-      - { name: description, label: Description, type: string }
-      - { name: body, label: Body, type: rich-text }
+      - name: author
+        label: Autor
+        type: string
+
+      - name: pubDatetime
+        label: Data de publicação
+        type: date
+        required: true
+
+      - name: modDatetime
+        label: Data de atualização
+        type: date
+
+      - name: title
+        label: Título
+        type: string
+        required: true
+
+      - name: ogImage
+        label: Imagem de destaque
+        type: string
+
+      - name: slug
+        label: Slug
+        type: string
+
+      - name: featured
+        label: Destaque
+        type: boolean
+
+      - name: draft
+        label: Rascunho
+        type: boolean
+
+      - name: tags
+        label: Tags
+        type: string
+        list: true
+
+      - name: description
+        label: Resumo
+        type: string
+
+      - name: body
+        label: Conteúdo
+        type: rich-text
+
   - name: about
-    label: About page
+    label: Quem Somos
     type: file
     path: src/pages/about.md
+
     fields:
-      - { name: layout, type: string, hidden: true, default: "../layouts/AboutLayout.astro" }
-      - { name: title, label: Title, type: string }
-      - { name: body, label: Body, type: rich-text, options: { input: public/assets, output: /assets } }
+      - name: layout
+        type: string
+        hidden: true
+        default: "../layouts/AboutLayout.astro"
+
+      - name: title
+        label: Título
+        type: string
+
+      - name: body
+        label: Conteúdo
+        type: rich-text
+        options:
+          input: public/assets
+          output: /assets
