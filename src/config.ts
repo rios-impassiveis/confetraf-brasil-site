@@ -1,11 +1,11 @@
 import type { Site, SocialObjects } from "./types";
 
 export const SITE: Site = {
-  website: "https://rios-impossiveis.github.io/confetraf-brasil-site/",
+  website: "https://rios-impassiveis.github.io/confetraf-brasil-site/",
   author: "CONFETRAF-BRASIL",
   desc: "Confederação Nacional dos Trabalhadores e Trabalhadoras da Agricultura Familiar do Brasil.",
   title: "CONFETRAF-BRASIL",
-  ogImage: "confetraf-og.jpg",
+  ogImage: "og.png",
   lightAndDarkMode: true,
   postPerPage: 6,
   scheduledPostMargin: 15 * 60 * 1000,

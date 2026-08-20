@@ -23,4 +23,22 @@ const blog = defineCollection({
     }),
 });
 
-export const collections = { blog };
+const documents = defineCollection({
+  type: "content",
+  schema: z.object({
+    title: z.string(),
+    category: z.enum([
+      "Estatuto",
+      "Atas",
+      "Editais",
+      "Resoluções",
+      "Cartilhas",
+      "Outros",
+    ]),
+    date: z.date(),
+    description: z.string(),
+    file: z.string(),
+  }),
+});
+
+export const collections = { blog, documents };

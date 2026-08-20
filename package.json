@@ -1,6 +1,6 @@
 {
-  "name": "astro-paper",
-  "version": "4.2.0",
+  "name": "confetraf-brasil-site",
+  "version": "1.0.0",
   "private": false,
   "scripts": {
     "dev": "astro dev",

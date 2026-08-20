@@ -1,123 +1,148 @@
 ---
-import { getCollection } from "astro:content";
 import Layout from "@layouts/Layout.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import LinkButton from "@components/LinkButton.astro";
-import Hr from "@components/Hr.astro";
 import Card from "@components/Card";
-import Socials from "@components/Socials.astro";
+import Datetime from "@components/Datetime";
+import { SITE } from "@config";
+import { withBase } from "@utils/getPath";
+import { slugifyStr } from "@utils/slugify";
+import getPosts from "@utils/getPosts";
 import getSortedPosts from "@utils/getSortedPosts";
-import { SOCIALS } from "@config";
+import getDocuments from "@utils/getDocuments";
 
-const posts = await getCollection("blog");
-
+const posts = await getPosts();
 const sortedPosts = getSortedPosts(posts);
-const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
-const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
 
-const socialCount = SOCIALS.filter(social => social.active).length;
+const featuredPost = sortedPosts.find(({ data }) => data.featured);
+const recentPosts = sortedPosts
+  .filter(post => post.slug !== featuredPost?.slug)
+  .slice(0, 4);
+
+const documents = (await getDocuments())
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
 ---
 
 <Layout>
-  <Header />
+  <Header activeNav="inicio" />
   <main id="main-content">
-    <section id="hero">
-      <h1>Mingalaba</h1>
-      <a
-        target="_blank"
-        href="/rss.xml"
-        class="rss-link"
-        aria-label="rss feed"
-        title="RSS Feed"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="rss-icon"
-          ><path
-            d="M19 20.001C19 11.729 12.271 5 4 5v2c7.168 0 13 5.832 13 13.001h2z"
-          ></path><path
-            d="M12 20.001h2C14 14.486 9.514 10 4 10v2c4.411 0 8 3.589 8 8.001z"
-          ></path><circle cx="6" cy="18" r="2"></circle>
-        </svg>
-        <span class="sr-only">RSS Feed</span>
-      </a>
-
-      <p>
-        AstroPaper is a minimal, responsive, accessible and SEO-friendly Astro
-        blog theme. This theme follows best practices and provides accessibility
-        out of the box. Light and dark mode are supported by default. Moreover,
-        additional color schemes can also be configured.
-      </p>
-      <p>
-        Read the blog posts or check
-        <LinkButton
-          className="underline decoration-dashed underline-offset-4 hover:text-skin-accent"
-          href="https://github.com/satnaing/astro-paper#readme"
-        >
-          README
-        </LinkButton> for more info.
-      </p>
-      {
-        // only display if at least one social link is enabled
-        socialCount > 0 && (
-          <div class="social-wrapper">
-            <div class="social-links">Social Links:</div>
-            <Socials />
-          </div>
-        )
-      }
-    </section>
-
-    <Hr />
+    <div class="hero-band">
+      <div class="hero-inner">
+        <h1>{SITE.title}</h1>
+        <p class="hero-desc">{SITE.desc}</p>
+        <div class="hero-actions">
+          <LinkButton
+            href={withBase("/confederacao/")}
+            className="btn btn-primary"
+          >
+            Conheça a Confederação
+          </LinkButton>
+          <LinkButton href={withBase("/posts/")} className="btn btn-outline">
+            Ver notícias
+          </LinkButton>
+        </div>
+      </div>
+    </div>
 
     {
-      featuredPosts.length > 0 && (
-        <>
-          <section id="featured">
-            <h2>Featured</h2>
-            <ul>
-              {featuredPosts.map(({ data, slug }) => (
-                <Card
-                  href={`/posts/${slug}/`}
-                  frontmatter={data}
-                  secHeading={false}
-                />
-              ))}
-            </ul>
-          </section>
-          {recentPosts.length > 0 && <Hr />}
-        </>
+      featuredPost && (
+        <section id="featured" aria-labelledby="featured-heading">
+          <h2 id="featured-heading">Notícia em destaque</h2>
+          <a
+            href={withBase(`/posts/${featuredPost.slug}/`)}
+            class="featured-card"
+          >
+            <h3 transition:name={slugifyStr(featuredPost.data.title)}>
+              {featuredPost.data.title}
+            </h3>
+            <Datetime
+              pubDatetime={featuredPost.data.pubDatetime}
+              modDatetime={featuredPost.data.modDatetime}
+            />
+            <p>{featuredPost.data.description}</p>
+          </a>
+        </section>
       )
     }
 
     {
       recentPosts.length > 0 && (
-        <section id="recent-posts">
-          <h2>Recent Posts</h2>
+        <section id="recent-posts" aria-labelledby="recent-heading">
+          <h2 id="recent-heading">Notícias recentes</h2>
           <ul>
-            {recentPosts.map(
-              ({ data, slug }, index) =>
-                index < 4 && (
-                  <Card
-                    href={`/posts/${slug}/`}
-                    frontmatter={data}
-                    secHeading={false}
-                  />
-                )
-            )}
+            {recentPosts.map(({ data, slug }) => (
+              <Card
+                href={withBase(`/posts/${slug}/`)}
+                frontmatter={data}
+                secHeading={false}
+              />
+            ))}
           </ul>
+          <div class="section-cta">
+            <LinkButton href={withBase("/posts/")} className="btn btn-outline">
+              Ver todas as notícias
+            </LinkButton>
+          </div>
         </section>
       )
     }
 
-    <div class="all-posts-btn-wrapper">
-      <LinkButton href="/posts/">
-        All Posts
-        <svg xmlns="http://www.w3.org/2000/svg"
-          ><path
-            d="m11.293 17.293 1.414 1.414L19.414 12l-6.707-6.707-1.414 1.414L15.586 11H6v2h9.586z"
-          ></path>
-        </svg>
+    <section id="institucional" aria-labelledby="institucional-heading">
+      <h2 id="institucional-heading">A Confederação</h2>
+      <p>
+        A CONFETRAF-BRASIL reúne federações e organizações sindicais que
+        representam trabalhadoras e trabalhadores da agricultura familiar em
+        todo o Brasil.
+      </p>
+      <LinkButton href={withBase("/confederacao/")} className="btn btn-outline">
+        Saiba mais
       </LinkButton>
+    </section>
+
+    <section id="organizacao" aria-labelledby="organizacao-heading">
+      <h2 id="organizacao-heading">Organização territorial</h2>
+      <p>
+        Conheça as federações e sindicatos filiados, e a presença da
+        CONFETRAF-BRASIL nos territórios.
+      </p>
+      <LinkButton href={withBase("/organizacao/")} className="btn btn-outline">
+        Ver organização
+      </LinkButton>
+    </section>
+
+    {
+      documents.length > 0 && (
+        <section id="documentos" aria-labelledby="documentos-heading">
+          <h2 id="documentos-heading">Documentos</h2>
+          <ul class="document-list">
+            {documents.map(({ data }) => (
+              <li>
+                <a href={withBase(data.file)}>{data.title}</a>
+                <span class="document-category">{data.category}</span>
+              </li>
+            ))}
+          </ul>
+          <div class="section-cta">
+            <LinkButton
+              href={withBase("/documentos/")}
+              className="btn btn-outline"
+            >
+              Ver todos os documentos
+            </LinkButton>
+          </div>
+        </section>
+      )
+    }
+
+    <div class="contact-band">
+      <div class="contact-inner">
+        <h2>Fale com a CONFETRAF-BRASIL</h2>
+        <LinkButton href={withBase("/contato/")} className="btn btn-primary">
+          Entrar em contato
+        </LinkButton>
+      </div>
     </div>
   </main>
 
@@ -125,39 +150,85 @@ const socialCount = SOCIALS.filter(social => social.active).length;
 </Layout>
 
 <style>
-  /* ===== Hero Section ===== */
-  #hero {
-    @apply pb-6 pt-8;
+  .hero-band {
+    @apply mb-8 bg-skin-card;
   }
-  #hero h1 {
-    @apply my-4 inline-block text-3xl font-bold sm:my-8 sm:text-5xl;
+  .hero-inner {
+    @apply mx-auto max-w-3xl px-4 py-12 sm:py-16;
   }
-  #hero .rss-link {
-    @apply mb-6;
+  .hero-inner h1 {
+    @apply text-3xl font-bold sm:text-5xl;
   }
-  #hero .rss-icon {
-    @apply mb-2 h-6 w-6 scale-110 fill-skin-accent sm:mb-3 sm:scale-125;
+  .hero-desc {
+    @apply mt-4 max-w-2xl text-lg opacity-90;
   }
-  #hero p {
-    @apply my-2;
-  }
-  .social-wrapper {
-    @apply mt-4 flex flex-col sm:flex-row sm:items-center;
-  }
-  .social-links {
-    @apply mb-1 mr-2 whitespace-nowrap sm:mb-0;
+  .hero-actions {
+    @apply mt-6 flex flex-wrap gap-3;
   }
 
-  /* ===== Featured & Recent Posts Sections ===== */
+  .btn {
+    @apply inline-block rounded px-5 py-2.5 font-medium no-underline transition-colors;
+  }
+  .btn-primary {
+    @apply bg-skin-accent text-skin-inverted hover:opacity-90 hover:!text-skin-inverted;
+  }
+  .btn-outline {
+    @apply border border-skin-line text-skin-base hover:border-skin-accent hover:text-skin-accent;
+  }
+
   #featured,
-  #recent-posts {
-    @apply pb-6 pt-12;
+  #recent-posts,
+  #institucional,
+  #organizacao,
+  #documentos {
+    @apply pb-6 pt-10;
   }
   #featured h2,
-  #recent-posts h2 {
-    @apply text-2xl font-semibold tracking-wide;
+  #recent-posts h2,
+  #institucional h2,
+  #organizacao h2,
+  #documentos h2 {
+    @apply mb-4 text-2xl font-semibold tracking-wide;
   }
-  .all-posts-btn-wrapper {
-    @apply my-8 text-center;
+  #institucional p,
+  #organizacao p {
+    @apply mb-4 max-w-2xl;
+  }
+
+  .featured-card {
+    @apply block rounded border border-skin-line bg-skin-card p-5 no-underline hover:border-skin-accent;
+  }
+  .featured-card h3 {
+    @apply text-xl font-medium text-skin-accent;
+  }
+  .featured-card p {
+    @apply mt-2 text-skin-base;
+  }
+
+  .section-cta {
+    @apply mt-4;
+  }
+
+  .document-list {
+    @apply space-y-2;
+  }
+  .document-list li {
+    @apply flex flex-wrap items-baseline gap-2;
+  }
+  .document-list a {
+    @apply font-medium text-skin-accent underline-offset-4 hover:underline;
+  }
+  .document-category {
+    @apply text-sm opacity-70;
+  }
+
+  .contact-band {
+    @apply mt-12 bg-skin-card;
+  }
+  .contact-inner {
+    @apply mx-auto flex max-w-3xl flex-col items-start gap-4 px-4 py-10 sm:flex-row sm:items-center sm:justify-between;
+  }
+  .contact-inner h2 {
+    @apply text-xl font-semibold;
   }
 </style>

@@ -1,0 +1,92 @@
+---
+import Layout from "@layouts/Layout.astro";
+import Main from "@layouts/Main.astro";
+import Header from "@components/Header.astro";
+import Footer from "@components/Footer.astro";
+import { SITE, LOCALE } from "@config";
+import { withBase } from "@utils/getPath";
+import getDocuments from "@utils/getDocuments";
+
+const CATEGORY_ORDER = [
+  "Estatuto",
+  "Atas",
+  "Editais",
+  "Resoluções",
+  "Cartilhas",
+  "Outros",
+] as const;
+
+const documents = await getDocuments();
+
+const groups = CATEGORY_ORDER.map(category => ({
+  category,
+  items: documents
+    .filter(doc => doc.data.category === category)
+    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()),
+})).filter(group => group.items.length > 0);
+---
+
+<Layout
+  title={`Documentos | ${SITE.title}`}
+  description="Estatuto, atas, editais, resoluções, cartilhas e outros documentos oficiais da CONFETRAF-BRASIL."
+>
+  <Header activeNav="documentos" />
+  <Main
+    pageTitle="Documentos"
+    pageDesc="Estatuto, atas, editais, resoluções, cartilhas e outros documentos oficiais da CONFETRAF-BRASIL."
+  >
+    {
+      groups.length === 0 ? (
+        <p>Nenhum documento publicado no momento.</p>
+      ) : (
+        groups.map(({ category, items }) => (
+          <section class="document-group">
+            <h2>{category}</h2>
+            <ul>
+              {items.map(({ data }) => (
+                <li class="document-item">
+                  <a href={withBase(data.file)} class="document-title">
+                    {data.title}
+                  </a>
+                  <time
+                    datetime={data.date.toISOString()}
+                    class="document-date"
+                  >
+                    {data.date.toLocaleDateString(LOCALE.langTag, {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </time>
+                  <p class="document-desc">{data.description}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      )
+    }
+  </Main>
+  <Footer />
+</Layout>
+
+<style>
+  .document-group {
+    @apply mb-10;
+  }
+  .document-group h2 {
+    @apply mb-3 border-b border-skin-line pb-2 text-xl font-semibold;
+  }
+  .document-item {
+    @apply border-b border-skin-line py-3 last:border-none;
+  }
+  .document-title {
+    @apply text-lg font-medium text-skin-accent underline-offset-4 hover:underline;
+  }
+  .document-date {
+    @apply ml-2 text-sm opacity-70;
+  }
+  .document-desc {
+    @apply mt-1 opacity-90;
+  }
+</style>

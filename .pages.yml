@@ -60,24 +60,149 @@ content:
       - name: description
         label: Resumo
         type: string
+        required: true
 
       - name: body
         label: Conteúdo
         type: rich-text
 
-  - name: about
-    label: Quem Somos
+  - name: documents
+    label: Documentos
+    type: collection
+    path: src/content/documents
+    filename: "{primary}.md"
+
+    view:
+      fields: [title, category, date]
+      primary: title
+      sort: date
+      default:
+        sort: date
+        order: desc
+
+    fields:
+      - name: title
+        label: Título
+        type: string
+        required: true
+
+      - name: category
+        label: Categoria
+        type: select
+        options:
+          - Estatuto
+          - Atas
+          - Editais
+          - Resoluções
+          - Cartilhas
+          - Outros
+        required: true
+
+      - name: date
+        label: Data
+        type: date
+        required: true
+
+      - name: description
+        label: Descrição
+        type: string
+        required: true
+
+      - name: file
+        label: Arquivo (PDF)
+        type: file
+        required: true
+        options:
+          input: public/documents
+          output: /documents
+
+  - name: confederacao
+    label: A Confederação
     type: file
-    path: src/pages/about.md
+    path: src/pages/confederacao.md
 
     fields:
       - name: layout
         type: string
         hidden: true
-        default: "../layouts/AboutLayout.astro"
+        default: "../layouts/InstitutionalLayout.astro"
+
+      - name: activeNav
+        type: string
+        hidden: true
+        default: "confederacao"
 
       - name: title
         label: Título
+        type: string
+        required: true
+
+      - name: description
+        label: Resumo (SEO)
+        type: string
+
+      - name: body
+        label: Conteúdo
+        type: rich-text
+        options:
+          input: public/assets
+          output: /assets
+
+  - name: organizacao
+    label: Organização
+    type: file
+    path: src/pages/organizacao.md
+
+    fields:
+      - name: layout
+        type: string
+        hidden: true
+        default: "../layouts/InstitutionalLayout.astro"
+
+      - name: activeNav
+        type: string
+        hidden: true
+        default: "organizacao"
+
+      - name: title
+        label: Título
+        type: string
+        required: true
+
+      - name: description
+        label: Resumo (SEO)
+        type: string
+
+      - name: body
+        label: Conteúdo
+        type: rich-text
+        options:
+          input: public/assets
+          output: /assets
+
+  - name: contato
+    label: Contato
+    type: file
+    path: src/pages/contato.md
+
+    fields:
+      - name: layout
+        type: string
+        hidden: true
+        default: "../layouts/InstitutionalLayout.astro"
+
+      - name: activeNav
+        type: string
+        hidden: true
+        default: "contato"
+
+      - name: title
+        label: Título
+        type: string
+        required: true
+
+      - name: description
+        label: Resumo (SEO)
         type: string
 
       - name: body
